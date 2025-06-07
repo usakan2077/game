@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>テトリスゲーム</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>テトリスゲーム</h1>
+        
+        <div class="game-container">
+            <div>
+                <canvas id="tetris-board" class="tetris-board" width="300" height="600"></canvas>
+            </div>
+            <div class="game-info">
+                <h3>スコア: <span id="score">0</span></h3>
+                <h3>レベル: <span id="level">1</span></h3>
+                <h3>保持ピース:</h3>
+                <canvas id="hold-piece" class="hold-piece-container" width="80" height="80"></canvas>
+                <h3>次のピース:</h3>
+                <canvas id="next-piece" class="next-piece-container" width="100" height="100"></canvas>
+                <div class="controls">
+                    <button id="start-button">ゲームスタート</button>
+                    <button id="pause-button">一時停止</button>
+                </div>
+                <div class="instructions" style="margin-top: 20px;">
+                    <h4>操作方法:</h4>
+                    <p>← 左に移動</p>
+                    <p>→ 右に移動</p>
+                    <p>↓ 下に移動（ソフトドロップ）</p>
+                    <p>↑ 回転</p>
+                    <p>スペース ハードドロップ</p>
+                    <p>C または H キー ピースをホールド</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

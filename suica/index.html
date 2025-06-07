@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>スイカゲーム</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-header">
+            <div class="score-container">
+                <span>スコア: </span>
+                <span id="score">0</span>
+            </div>
+            <button id="restart-button">リスタート</button>
+        </div>
+        
+        <div class="game-area">
+            <div id="next-fruit-container">
+                <div>次のフルーツ</div>
+                <div id="next-fruit"></div>
+            </div>
+            <canvas id="game-canvas" width="400" height="600"></canvas>
+            <div id="game-over" class="hidden">
+                <div class="game-over-content">
+                    <h2>ゲームオーバー</h2>
+                    <p>スコア: <span id="final-score">0</span></p>
+                    <button id="play-again">もう一度プレイ</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- フルーツ凡例表示部分を追加 -->
+        <div class="fruit-legend">
+            <h3>フルーツ進化表</h3>
+            <div id="fruit-legend-container"></div>
+        </div>
+    </div>
+    
+    <img id="animal-image" src="images/animal.png" alt="Animal" style="display: none;">
+</body>
+</html>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.18.0/matter.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
