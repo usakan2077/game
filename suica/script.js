@@ -409,6 +409,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     World.add(world, newFruitBody);
 
+                    // 新しいフルーツにバウンスエフェクトのフラグを設定
+                    newFruitBody.isBouncing = true;
+                    newFruitBody.bounceStartTime = engine.timing.timestamp; // アニメーション開始時間
+
                     score += fruit.points;
                     updateScore();
                 }
@@ -492,29 +496,36 @@ document.addEventListener('DOMContentLoaded', () => {
                     highestFruitY = body.position.y;
                 }
 
-                // --- 基準線を超えたフルーツの強調表示 ---
-                if (body.position.y < threshold && !isDropping) {
-                    // フルーツの実際の位置に警告マーカーを描画
-                    ctx.beginPath();
-                    ctx.arc(body.position.x, body.position.y, body.circleRadius + 5, 0, Math.PI * 2); // フルーツより少し大きい円
-                    ctx.fillStyle = 'rgba(255, 0, 0, 0.2)'; // 半透明の赤
-                    ctx.fill();
+                // バウンスエフェクトの更新
+                if (body.isBouncing && body.render.sprite) {
+                    const elapsedTime = engine.timing.timestamp - body.bounceStartTime;
+                    const duration = 300; // アニメーションの持続時間 (ms)
+                    const maxScaleFactor = 1.2; // 最大スケール倍率
+                    const minScaleFactor = 0.8; // 最小スケール倍率 (縦方向の縮み)
 
-                    if (!body.timeAboveThreshold) {
-                        body.timeAboveThreshold = 1;
+                    if (elapsedTime < duration) {
+                        const progress = elapsedTime / duration;
+                        // 0 -> 1 -> 0 のカーブでスケールを変化させる
+                        // 例: sin(PI * progress) を利用して滑らかなアニメーション
+                        const scaleX = 1 + (maxScaleFactor - 1) * Math.sin(Math.PI * progress);
+                        const scaleY = 1 - (1 - minScaleFactor) * Math.sin(Math.PI * progress);
+
+                        // Matter.jsのボディの元のスケールを考慮
+                        const originalXScale = (getFruitByName(body.label).radius * 2) / fruitSprites[body.label].naturalWidth;
+                        const originalYScale = (getFruitByName(body.label).radius * 2) / fruitSprites[body.label].naturalHeight;
+
+                        body.render.sprite.xScale = originalXScale * scaleX;
+                        body.render.sprite.yScale = originalYScale * scaleY;
                     } else {
-                        body.timeAboveThreshold++;
-                        if (body.timeAboveThreshold > 60) { // 約1秒間閾値を超えていたら
-                            console.log('[gameOverCheck] Fruit above threshold for too long:', body.label, 'Y:', body.position.y, 'Time:', body.timeAboveThreshold);
-                            isAnyFruitAboveThreshold = true;
-                            // isAnyFruitAboveThresholdがtrueになったらループを抜ける必要はない（全ての警告マーカーを描画するため）
-                            // break; // ここでbreakすると、他の超えているフルーツの警告が描画されない
-                        }
+                        // アニメーション終了、元のスケールに戻す
+                        const originalXScale = (getFruitByName(body.label).radius * 2) / fruitSprites[body.label].naturalWidth;
+                        const originalYScale = (getFruitByName(body.label).radius * 2) / fruitSprites[body.label].naturalHeight;
+                        body.render.sprite.xScale = originalXScale;
+                        body.render.sprite.yScale = originalYScale;
+                        body.isBouncing = false; // アニメーション終了フラグ
                     }
-                } else if (body.position.y >= threshold) {
-                    body.timeAboveThreshold = 0;
                 }
-                // --- 強調表示ここまで ---
+
             }
         }
 
