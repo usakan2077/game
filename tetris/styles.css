@@ -84,3 +84,76 @@ button:hover {
     width: 100px;
     height: 100px;
 }
+
+/* モバイル対応 */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+
+    .container {
+        padding: 15px;
+    }
+
+    .game-container {
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .game-info {
+        min-width: unset;
+        width: 100%;
+        box-sizing: border-box;
+        text-align: center;
+    }
+
+    .controls {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-top: 15px;
+    }
+
+    button {
+        width: 100%;
+        margin: 5px 0;
+    }
+
+    .instructions {
+        display: none; /* モバイルでは操作説明を非表示にするか、別途タッチ操作説明を設ける */
+    }
+
+    /* モバイル操作ボタンのスタイル */
+    .mobile-controls {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-top: 20px;
+        width: 100%;
+        max-width: 300px; /* 適切な最大幅を設定 */
+    }
+
+    .mobile-controls button {
+        padding: 15px;
+        font-size: 1.2em;
+        margin: 0; /* 親要素のgapで調整 */
+    }
+
+    .mobile-controls .move-button {
+        background-color: #007bff;
+    }
+
+    .mobile-controls .rotate-button {
+        background-color: #ffc107;
+        color: #333;
+    }
+
+    .mobile-controls .drop-button {
+        background-color: #dc3545;
+    }
+
+    .mobile-controls .hold-button {
+        background-color: #6c757d;
+    }
+}

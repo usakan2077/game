@@ -476,6 +476,75 @@ document.addEventListener('DOMContentLoaded', () => {
                 break;
         }
     });
+
+    // モバイル操作ボタンのイベントリスナー
+    document.getElementById('mobile-left').addEventListener('click', () => {
+        if (gameOver || isPaused) return;
+        movePiece(-1);
+    });
+    document.getElementById('mobile-right').addEventListener('click', () => {
+        if (gameOver || isPaused) return;
+        movePiece(1);
+    });
+    document.getElementById('mobile-rotate').addEventListener('click', () => {
+        if (gameOver || isPaused) return;
+        rotatePiece();
+    });
+    document.getElementById('mobile-down').addEventListener('click', () => {
+        if (gameOver || isPaused) return;
+        dropPiece();
+    });
+    document.getElementById('mobile-hard-drop').addEventListener('click', () => {
+        if (gameOver || isPaused) return;
+        hardDrop();
+    });
+    document.getElementById('mobile-hold').addEventListener('click', () => {
+        if (gameOver || isPaused) return;
+        holdCurrentPiece();
+    });
+
+    // タッチスワイプ操作
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchEndX = 0;
+    let touchEndY = 0;
+
+    canvas.addEventListener('touchstart', e => {
+        if (gameOver || isPaused) return;
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+    });
+
+    canvas.addEventListener('touchmove', e => {
+        e.preventDefault(); // スクロールを防ぐ
+    });
+
+    canvas.addEventListener('touchend', e => {
+        if (gameOver || isPaused) return;
+        touchEndX = e.changedTouches[0].clientX;
+        touchEndY = e.changedTouches[0].clientY;
+
+        const dx = touchEndX - touchStartX;
+        const dy = touchEndY - touchStartY;
+
+        const sensitivity = 30; // スワイプ感度
+
+        if (Math.abs(dx) > Math.abs(dy)) {
+            // 横方向のスワイプ
+            if (dx > sensitivity) {
+                movePiece(1); // 右
+            } else if (dx < -sensitivity) {
+                movePiece(-1); // 左
+            }
+        } else {
+            // 縦方向のスワイプ
+            if (dy > sensitivity) {
+                dropPiece(); // 下（ソフトドロップ）
+            } else if (dy < -sensitivity) {
+                rotatePiece(); // 上（回転）
+            }
+        }
+    });
     
     // ゲームのリセット
     function resetGame() {
