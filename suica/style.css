@@ -43,19 +43,23 @@ body {
     font-weight: bold;
 }
 
-.game-header #restart-button {
-    background-color: #4CAF50;
+/* 新しいPC版リスタートボタンのスタイル */
+#restart-button-desktop {
+    background: linear-gradient(to right, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%);
     color: white;
     border: none;
-    padding: 8px 15px;
-    border-radius: 5px;
+    padding: 12px 25px;
+    border-radius: 25px;
     cursor: pointer;
-    font-size: 1rem;
-    /* display はJavaScriptで制御 */
+    font-size: 1.3em;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    transition: all 0.3s ease;
 }
 
-.game-header #restart-button:hover {
-    background-color: #45a049;
+#restart-button-desktop:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 
 .game-header #legend-toggle-button {
@@ -75,7 +79,7 @@ body {
 }
 
 .game-controls-bottom {
-    /* display はJavaScriptで制御 */
+    display: none; /* PC版では非表示 */
 }
 
 .game-area {
@@ -139,18 +143,22 @@ body {
 }
 
 #play-again {
-    background-color: #4CAF50;
+    background: linear-gradient(to right, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%);
     color: white;
     border: none;
-    padding: 10px 20px;
+    padding: 12px 25px;
     margin-top: 15px;
-    border-radius: 5px;
+    border-radius: 25px;
     cursor: pointer;
-    font-size: 1rem;
+    font-size: 1.3em;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    transition: all 0.3s ease;
 }
 
 #play-again:hover {
-    background-color: #45a049;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 
 .hidden {
@@ -283,8 +291,7 @@ body {
 
 #restart-button, #play-again {
     /* ボタンのスタイル */
-    padding: 10px 20px;
-    font-size: 1.2em;
+    /* スタイルは個別のセレクタで定義済み */
 }
 
 #final-score {
@@ -313,8 +320,12 @@ body {
         font-size: 1.2rem; /* Smaller score font */
     }
 
-    .game-header #restart-button {
-        display: none; /* Hide desktop restart button on mobile */
+    .game-header #restart-button { /* 既存の#restart-buttonはモバイルで非表示 */
+        display: none;
+    }
+
+    #restart-button-desktop { /* PC版リスタートボタンをモバイルで非表示 */
+        display: none;
     }
 
     .game-header #legend-toggle-button {
@@ -341,8 +352,20 @@ body {
     .game-controls-bottom #restart-button {
         display: block; /* Show restart button in bottom controls */
         width: 100%;
-        padding: 10px 20px;
-        font-size: 1.1rem;
+        background: linear-gradient(to right, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%);
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 25px;
+        font-size: 1.3em;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        transition: all 0.3s ease;
+    }
+
+    .game-controls-bottom #restart-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
     }
 
     .game-area {

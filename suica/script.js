@@ -407,19 +407,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     );
 
-                    // Matter.jsの物理ボディのスケールは変更せず、見た目のスケールのみを操作するため、
-                    // 初期スプライトスケールを保存しておく
-                    if (newFruitBody.render.sprite) {
-                        newFruitBody.render.sprite.initialXScale = renderOptionsNext.sprite.xScale;
-                        newFruitBody.render.sprite.initialYScale = renderOptionsNext.sprite.yScale;
-                    }
-
                     World.add(world, newFruitBody);
-
-                    // 新しいフルーツにバウンドエフェクトのプロパティを追加
-                    newFruitBody.isBouncing = true;
-                    newFruitBody.bounceProgress = 0; // 0から1までの進行度
-                    newFruitBody.bounceDuration = 30; // エフェクトのフレーム数 (例: 0.5秒 = 30フレーム)
 
                     score += fruit.points;
                     updateScore();
@@ -446,7 +434,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // ゲームオーバーのチェック
     Events.on(engine, 'afterUpdate', () => {
         const ctx = render.context; // コンテキストを最初に取得
-        const bodies = Composite.allBodies(world); // bodiesをここで一度だけ宣言
 
         // パーティクルの描画と更新
         for (let i = particles.length - 1; i >= 0; i--) {
@@ -470,50 +457,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // フルーツのバウンドエフェクトの更新
-        for (let body of bodies) { // 既存のbodiesを使用
-            if (body.isBouncing) {
-                body.bounceProgress++;
-                const progress = body.bounceProgress / body.bounceDuration;
-
-                // スケールファクターの計算 (0.5で最大に伸び、1で元のサイズに戻る)
-                // ユーザーの要望は「上下に伸び縮み」なので、yScaleのみを操作
-                let targetScaleY = 1;
-                if (progress <= 0.5) {
-                    // 最初の半分: 伸びる (1.0 -> 1.2)
-                    targetScaleY = 1 + Math.sin(progress * Math.PI) * 0.2; // sin(0)からsin(PI/2)まで
-                } else if (progress > 0.5 && progress <= 1) {
-                    // 後半: 縮む (1.2 -> 1.0)
-                    targetScaleY = 1 + Math.sin(progress * Math.PI) * 0.2; // sin(PI/2)からsin(PI)まで
-                }
-
-                // Matter.jsの物理ボディのスケールは変更せず、見た目のスケールのみを操作
-                if (body.render.sprite) {
-                    body.render.sprite.yScale = body.render.sprite.initialYScale * targetScaleY;
-                    body.render.sprite.xScale = body.render.sprite.initialXScale; // x方向は初期スケールを維持
-                }
-
-                if (progress >= 1) {
-                    // エフェクト終了
-                    body.isBouncing = false;
-                    // 最終的に元のスケールに戻す (初期スケールを再適用)
-                    if (body.render.sprite) {
-                        body.render.sprite.yScale = body.render.sprite.initialYScale;
-                        body.render.sprite.xScale = body.render.sprite.initialXScale;
-                    }
-                    delete body.bounceProgress;
-                    delete body.bounceDuration;
-                }
-            }
-        }
-
         if (gameOver) { // ゲームオーバーなら、テキスト描画のみ行い、他の更新はスキップする場合
             // 半透明のオーバーレイを描画
             ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
             ctx.fillRect(0, 0, gameWidth, gameHeight);
 
             // 「GAME OVER」テキストを描画
-            ctx.font = 'bold 60px Arial';
+            ctx.font = 'bold 40px Arial';
             ctx.fillStyle = 'white';
             ctx.textAlign = 'center';
             ctx.fillText('GAME OVER', gameWidth / 2, gameHeight / 2);
@@ -530,12 +480,12 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.stroke();
         // --- 基準線の描画ここまで ---
 
-        // bodiesは既に上で宣言されているため、ここでは再宣言しない
+        const bodies = Composite.allBodies(world);
         let isAnyFruitAboveThreshold = false;
         let fruitCount = 0;
         let highestFruitY = gameHeight; // 最も高いフルーツのY座標を記録
 
-        for (let body of bodies) { // 既存のbodiesを使用
+        for (let body of bodies) {
             if (body.label !== 'wall') {
                 fruitCount++;
                 if (body.position.y < highestFruitY) {
@@ -640,6 +590,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('restart-button').addEventListener('click', resetGame);
     document.getElementById('play-again').addEventListener('click', resetGame);
+    document.getElementById('restart-button-desktop').addEventListener('click', resetGame);
 
     // モーダル関連のイベントリスナー
     const legendToggleButton = document.getElementById('legend-toggle-button');
@@ -653,7 +604,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (closeLegendModalButton) {
-        closeLegendModalButton.addEventListener(() => {
+        closeLegendModalButton.addEventListener('click', () => {
             legendModal.style.display = 'none'; // モーダルを非表示
         });
     }
@@ -691,31 +642,3 @@ document.addEventListener('DOMContentLoaded', () => {
     // キャンバスの背景色を設定
     canvas.style.backgroundColor = '#e6fcec'; // 薄いグリーン
 });
-
-</final_file_content>
-
-IMPORTANT: For any future changes to this file, use the final_file_content shown above as your reference. This content reflects the current state of the file, including any auto-formatting (e.g., if you used single quotes but the formatter converted them to double quotes). Always base your SEARCH/REPLACE operations on this final version to ensure accuracy.
-
-<environment_details>
-# VSCode Visible Files
-C:/Users/daiki/AppData/Local/Programs/Microsoft VS Code/tetris/styles.css
-C:/Users/daiki/AppData/Local/Programs/Microsoft VS Code/tetris/styles.css
-suica/script.js
-
-# VSCode Open Tabs
-suica/index.html
-suica/script.js
-suica/style.css
-tetris/index.html
-tetris/styles.css
-tetris/script.js
-
-# Current Time
-6/8/2025, 4:34:38 PM (Asia/Tokyo, UTC+9:00)
-
-# Context Window Usage
-77,083 / 1,048.576K tokens used (7%)
-
-# Current Mode
-ACT MODE
-</environment_details>
