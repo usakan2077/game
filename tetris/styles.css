@@ -100,23 +100,24 @@ button:hover {
         flex-wrap: wrap; /* スペースが足りない場合に折り返す */
         align-items: flex-start; /* 上揃えに戻す */
         gap: 5px; /* ギャップをさらに小さく */
-        justify-content: center; /* 中央寄せ */
+        justify-content: flex-start; /* 中央寄せから左寄せに変更 */
     }
 
     .game-info {
-        min-width: 100px; /* 最小幅を調整 */
-        width: auto; /* 幅を自動調整 */
-        box-sizing: border-box;
-        text-align: left; /* 左寄せに戻す */
-        font-size: 0.7em; /* フォントサイズをさらに小さく */
-        padding: 3px; /* パディングをさらに小さく */
-    }
-
-    .controls {
-        display: flex; /* モバイルでも表示する */
+        display: flex;
         flex-wrap: wrap;
         justify-content: center;
-        margin-top: 10px; /* マージンを調整 */
+        align-items: center;
+        gap: 2px; /* ギャップをさらに小さく */
+        min-width: unset; /* 最小幅をリセット */
+        width: 80px; /* 幅を80pxに固定 */
+        box-sizing: border-box;
+        font-size: 0.6em; /* フォントサイズをさらに小さく */
+        padding: 2px; /* パディングをさらに小さく */
+    }
+
+    #pause-button {
+        display: none; /* モバイルでは非表示にする */
     }
 
     .instructions {
@@ -125,17 +126,30 @@ button:hover {
 
     /* モバイル操作ボタンのスタイル */
     .mobile-controls {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 5px; /* ギャップを小さく */
-        margin-top: 5px; /* マージンを小さく */
-        width: 100%;
-        max-width: 200px; /* 最大幅をさらに小さく */
+        position: fixed; /* 画面下部に固定 */
+        bottom: 0;
+        left: 0;
+        width: 100%; /* 画面幅全体に広げる */
+        max-width: none; /* 最大幅の制限を解除 */
+        background-color: rgba(0, 0, 0, 0.5); /* 半透明の黒背景 */
+        padding: 10px 5px; /* 上下のパディングを追加 */
+        box-sizing: border-box; /* パディングを幅に含める */
+        z-index: 999; /* 他の要素より手前に表示 */
+        
+        display: grid; /* 既存のグリッドレイアウトを維持 */
+        grid-template-columns: repeat(3, 1fr); /* 3列グリッド */
+        gap: 5px; /* ギャップを維持 */
+        margin-top: 0; /* マージンをリセット */
     }
 
     .mobile-controls button {
-        padding: 8px; /* パディングを小さく */
-        font-size: 0.9em; /* フォントサイズを小さく */
+        /* ボタン自体のスタイルは既存のものを利用しつつ、必要に応じて調整 */
+        background-color: rgba(255, 255, 255, 0.2); /* ボタンの背景も半透明に */
+        color: white; /* テキスト色を白に */
+        border: 1px solid rgba(255, 255, 255, 0.3); /* 薄い枠線 */
+        padding: 12px 8px; /* パディングを調整 */
+        font-size: 1em; /* フォントサイズを調整 */
+        border-radius: 5px;
         margin: 0; /* 親要素のgapで調整 */
     }
 
@@ -146,20 +160,103 @@ button:hover {
         margin: 2px; /* マージンを調整 */
     }
 
+    /* 各ボタンの背景色を半透明の白に変更 */
     .mobile-controls .move-button {
-        background-color: #007bff;
+        background-color: rgba(0, 123, 255, 0.5); /* 青系の半透明 */
+        border-color: rgba(0, 123, 255, 0.7);
     }
 
     .mobile-controls .rotate-button {
-        background-color: #ffc107;
-        color: #333;
+        background-color: rgba(255, 193, 7, 0.5); /* 黄色系の半透明 */
+        border-color: rgba(255, 193, 7, 0.7);
+        color: #333; /* テキスト色を調整 */
     }
 
     .mobile-controls .drop-button {
-        background-color: #dc3545;
+        background-color: rgba(220, 53, 69, 0.5); /* 赤系の半透明 */
+        border-color: rgba(220, 53, 69, 0.7);
     }
 
     .mobile-controls .hold-button {
-        background-color: #6c757d;
+        background-color: rgba(108, 117, 125, 0.5); /* グレー系の半透明 */
+        border-color: rgba(108, 117, 125, 0.7);
     }
+
+    /* 保持ピースと次のピースの表示調整 */
+    /* game-infoのスタイルは上に移動し、調整済み */
+
+    /* スコアとレベルの表示を調整 */
+    .game-info h3:nth-of-type(1), /* スコア */
+    .game-info h3:nth-of-type(2) { /* レベル */
+        flex: 1 1 auto; /* 柔軟に幅を調整 */
+        text-align: center;
+        margin: 0;
+        font-size: 1em; /* 親のfont-sizeが小さくなったので調整 */
+    }
+
+    /* 保持ピースと次のピースのh3タグを非表示にする */
+    .game-info h3:nth-of-type(3), /* 保持ピース: */
+    .game-info h3:nth-of-type(4) { /* 次のピース: */
+        display: none;
+    }
+
+    .hold-piece-container,
+    .next-piece-container {
+        max-width: 40px; /* 保持ピースと次のピースの最大幅をさらに小さく */
+        max-height: 40px; /* 保持ピースと次のピースの最大高さをさらに小さく */
+        width: auto !important; /* JavaScriptで設定されたwidthを上書き */
+        height: auto !important; /* JavaScriptで設定されたheightを上書き */
+        border: 1px solid #ccc;
+        background-color: #f9f9f9;
+        padding: 1px; /* パディングをさらに小さく */
+        flex: 0 0 auto; /* 幅を固定 */
+        margin: 0 1px; /* 左右のマージンを調整 */
+    }
+}
+
+/* モーダルスタイル */
+.modal {
+    display: flex; /* 初期状態ではflexにしておくが、JavaScriptで制御 */
+    position: fixed;
+    z-index: 1000; /* 他の要素より手前に表示 */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.7); /* 半透明の黒 */
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: auto;
+    padding: 30px;
+    border: 1px solid #888;
+    width: 80%; /* 幅を調整 */
+    max-width: 400px; /* 最大幅を設定 */
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+}
+
+.modal-content h2 {
+    margin-top: 0;
+    color: #333;
+}
+
+.modal-content button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 15px 30px;
+    font-size: 1.2em;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+.modal-content button:hover {
+    background-color: #45a049;
 }

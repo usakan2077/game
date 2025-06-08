@@ -14,6 +14,10 @@ document.addEventListener('DOMContentLoaded', () => {
         '#FFE138', // T
         '#3877FF'  // Z
     ];
+
+    // モーダル要素の取得
+    const startModal = document.getElementById('start-modal');
+    const startButton = document.getElementById('start-button'); // モーダル内のスタートボタン
     
     // キャンバスとコンテキストの設定
     const canvas = document.getElementById('tetris-board');
@@ -358,8 +362,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (collide()) {
                 // 衝突する場合はゲームオーバー
                 gameOver = true;
-                alert('ゲームオーバー！スコア: ' + score);
-                resetGame();
+                // alert('ゲームオーバー！スコア: ' + score); // alertは不要
+                resetGame(); // ゲームオーバー時にリセットし、モーダルを表示
                 return;
             }
         }
@@ -389,8 +393,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // ゲームオーバーの確認
         if (collide()) {
             gameOver = true;
-            alert('ゲームオーバー！スコア: ' + score);
-            resetGame();
+            // alert('ゲームオーバー！スコア: ' + score); // alertは不要
+            resetGame(); // ゲームオーバー時にリセットし、モーダルを表示
         }
     }
     
@@ -435,7 +439,11 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // ゲームループ
     function update(time = 0) {
-        if (gameOver || !gameStarted) return; // ゲームが開始されていなければ何もしない
+        if (gameOver) { // ゲームオーバーの場合、モーダルを表示して終了
+            startModal.style.display = 'flex';
+            return;
+        }
+        if (!gameStarted) return; // ゲームが開始されていなければ何もしない
         
         const deltaTime = time - lastTime;
         lastTime = time;
@@ -566,6 +574,7 @@ document.addEventListener('DOMContentLoaded', () => {
         level = 1;
         gameOver = false;
         isPaused = false;
+        gameStarted = false; // ゲームがリセットされたら未開始状態に戻す
         dropInterval = 1000;
         document.getElementById('score').textContent = '0';
         document.getElementById('level').textContent = '1';
@@ -576,19 +585,23 @@ document.addEventListener('DOMContentLoaded', () => {
         drawHoldPiece();
         drawBoard(); // 初期状態のボードを描画
         drawNextPiece(); // 次のピースを描画
+
+        // ゲームがリセットされたらモーダルを表示
+        startModal.style.display = 'flex';
     }
     
     // ゲーム開始ボタン
-    document.getElementById('start-button').addEventListener('click', () => {
+    startButton.addEventListener('click', () => { // モーダル内のスタートボタン
         if (gameOver) {
-            resetGame();
-            gameOver = false;
+            resetGame(); // ゲームオーバー状態からのリセット
+            gameOver = false; // リセット後にgameOverフラグをfalseに
         } else if (isPaused) {
             isPaused = false;
         }
         
         if (!gameStarted) {
             gameStarted = true;
+            startModal.style.display = 'none'; // ゲーム開始時にモーダルを非表示
             update(); // ゲームループを開始
         }
     });
@@ -599,7 +612,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     // ゲーム初期化
-    resetGame();
+    resetGame(); // ページロード時にモーダルが表示されるようにresetGameを呼び出す
     // update() の呼び出しをここでは行わない - スタートボタンを押すまでゲームは始まらない
     drawBoard(); // 初期状態のボードを描画
+
+    // ダブルクリックによる拡大を防止
+    document.body.addEventListener('dblclick', e => {
+        e.preventDefault();
+    });
 });
