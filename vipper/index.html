@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIPPERゲーム</title>
+    <meta property="og:title" content="VIPPERゲーム">
+    <meta property="og:description" content="VIPPERを大きく育てて高得点を目指そう！">
+    <meta property="og:image" content="https://example.com/images/forest-background.jpg"> <!-- 適切なURLに置き換えてください -->
+    <meta property="og:url" content="https://nekohebi.netlify.app/vipper/index.html"> <!-- 適切なURLに置き換えてください -->
+    <meta property="og:type" content="website">
+    <link rel="icon" href="images/icon1.png" type="image/png">
+    <link rel="apple-touch-icon" href="images/icon1.png">
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-header">
+            <div class="score-container">
+                <span>スコア: </span>
+                <span id="score">0</span>
+            </div>
+            <button id="restart-button-desktop">リスタート</button>
+            <button id="legend-toggle-button" class="mobile-only-button hidden">VIPPER進化表</button> <!-- テキストを変更 -->
+        </div>
+        
+        <div class="game-area">
+            <div id="next-fruit-container">
+                <div>次のVIPPER</div>
+                <div id="next-fruit"></div>
+            </div>
+            <canvas id="game-canvas" width="400" height="600"></canvas>
+            <div id="game-over" class="hidden">
+                <div class="game-over-content">
+                    <h2>ゲームオーバー</h2>
+                    <p>スコア: <span id="final-score">0</span></p>
+                    <button id="play-again">もう一度プレイ</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- VIPPER凡例表示部分を追加 -->
+        <div class="fruit-legend">
+            <h3>VIPPER進化表</h3>
+            <div id="fruit-legend-container"></div>
+        </div>
+
+        <!-- 新しいコントロールボタンコンテナ -->
+        <div class="game-controls-bottom mobile-only-controls">
+            <button id="restart-button">リスタート</button>
+        </div>
+    </div>
+    
+    <img id="animal-image" src="images/animal.png" alt="Animal" style="display: none;">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.18.0/matter.min.js"></script>
+    <script src="script.js"></script>
+
+    <!-- VIPPER凡例モーダル -->
+    <div id="legend-modal" class="hidden">
+        <div class="modal-content">
+            <span class="close-button" id="close-legend-modal">&times;</span>
+            <div class="fruit-legend-modal-content">
+                <h3>VIPPER進化表</h3>
+                <div id="fruit-legend-container-modal"></div> <!-- モーダル用の凡例コンテナ -->
+            </div>
+        </div>
+    </div>
+</body>
+</html>

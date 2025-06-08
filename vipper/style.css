@@ -1,0 +1,412 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    background-image: url('images/forest-background.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 10px; /* Reduce padding for smaller screens */
+    overflow-x: hidden; /* Prevent horizontal scroll */
+}
+
+.game-container {
+    width: 95%; /* Use a slightly smaller percentage */
+    max-width: 450px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 15px; /* Reduce padding */
+}
+
+.game-header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.score-container {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+/* 新しいPC版リスタートボタンのスタイル */
+#restart-button-desktop {
+    background: linear-gradient(to right, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 1.3em;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    transition: all 0.3s ease;
+}
+
+#restart-button-desktop:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.game-header #legend-toggle-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-left: 10px; /* Add some space */
+    /* display はJavaScriptで制御 */
+}
+
+.game-header #legend-toggle-button:hover {
+    background-color: #0056b3;
+}
+
+.game-controls-bottom {
+    display: none; /* PC版では非表示 */
+}
+
+.game-area {
+    position: relative;
+    width: 100%;
+    display: flex; /* Use flexbox for game-area */
+    flex-direction: row; /* Default to row for larger screens */
+    justify-content: center;
+    align-items: flex-start; /* Align items to start */
+    gap: 10px; /* Add some gap */
+}
+
+#game-canvas {
+    width: 100%; /* Make canvas responsive */
+    max-width: 400px; /* Set max-width for larger screens */
+    height: 500px; /* Keep height fixed for now, might adjust later if needed */
+    background-color: #f8f8f8;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+}
+
+#next-fruit-container {
+    position: static; /* Remove absolute positioning for default */
+    width: 80px;
+    height: 80px;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 5px;
+    padding: 5px;
+    text-align: center;
+    font-size: 0.9rem;
+    flex-shrink: 0; /* Prevent shrinking */
+}
+
+#next-fruit {
+    width: 50px;
+    height: 50px;
+    margin: 5px auto;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+#game-over {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 8px;
+}
+
+.game-over-content {
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+#play-again {
+    background: linear-gradient(to right, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    margin-top: 15px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 1.3em;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    transition: all 0.3s ease;
+}
+
+#play-again:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.hidden {
+    display: none;
+}
+
+/* フルーツ凡例のスタイル */
+.fruit-legend {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 100%;
+}
+
+/* モーダルのスタイル */
+#legend-modal {
+    position: fixed;
+    z-index: 1000; /* 最前面に表示 */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.8); /* 半透明の背景 */
+    /* display: flex; はJavaScriptで制御 */
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 90%; /* モーダルの幅 */
+    max-width: 500px; /* 最大幅 */
+    border-radius: 10px;
+    position: relative;
+}
+
+.close-button {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    cursor: pointer;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.fruit-legend-modal-content {
+    /* モーダル内の凡例コンテンツのスタイル */
+    padding-top: 20px; /* 閉じるボタンとの間隔 */
+}
+
+.fruit-legend-modal-content h3 {
+    text-align: center;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+#fruit-legend-container-modal {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+}
+
+.fruit-legend h3 {
+    text-align: center;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+#fruit-legend-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+}
+
+.legend-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 60px;
+    margin-bottom: 8px;
+}
+
+.legend-image {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    margin-bottom: 4px;
+}
+
+.legend-name {
+    font-size: 0.7rem;
+    text-align: center;
+    color: #333;
+}
+
+.legend-points {
+    font-size: 0.7rem;
+    color: #E52D27;
+    font-weight: bold;
+}
+
+.legend-arrow {
+    font-size: 1rem;
+    color: #666;
+    margin: 0 2px;
+    align-self: center;
+}
+
+#score, #restart-button, #play-again, #final-score {
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    font-weight: 700; /* 必要に応じてフォントの太さを調整 */
+}
+
+#restart-button, #play-again {
+    /* ボタンのスタイル */
+    /* スタイルは個別のセレクタで定義済み */
+}
+
+#final-score {
+    font-size: 2em;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 600px) {
+    body {
+        align-items: flex-start; /* Align to top on small screens */
+    }
+
+    .game-container {
+        margin-top: 10px; /* Reduce top margin */
+        padding: 10px; /* Reduce padding */
+    }
+
+    .game-header {
+        flex-direction: row; /* Keep score and legend toggle on one line */
+        justify-content: space-between;
+        align-items: center;
+        gap: 0; /* Remove gap */
+    }
+
+    .score-container {
+        font-size: 1.2rem; /* Smaller score font */
+    }
+
+    .game-header #restart-button { /* 既存の#restart-buttonはモバイルで非表示 */
+        display: none;
+    }
+
+    #restart-button-desktop { /* PC版リスタートボタンをモバイルで非表示 */
+        display: none;
+    }
+
+    .game-header #legend-toggle-button {
+        display: block; /* Show button on mobile */
+        width: auto; /* Allow button to size naturally */
+        margin-left: 0;
+        padding: 6px 12px; /* Smaller padding */
+        font-size: 0.9rem; /* Smaller font size */
+    }
+
+    .fruit-legend {
+        display: none; /* Hide original legend on mobile */
+    }
+
+    .game-controls-bottom {
+        display: flex; /* Show controls at bottom on mobile */
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        margin-top: 15px; /* Space from game area */
+        gap: 10px;
+    }
+
+    .game-controls-bottom #restart-button {
+        display: block; /* Show restart button in bottom controls */
+        width: 100%;
+        background: linear-gradient(to right, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%);
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 25px;
+        font-size: 1.3em;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        transition: all 0.3s ease;
+    }
+
+    .game-controls-bottom #restart-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .game-area {
+        flex-direction: column; /* Stack items vertically on small screens */
+        align-items: center; /* Center items horizontally */
+        gap: 5px; /* Reduce gap */
+    }
+
+    #game-canvas {
+        height: 400px; /* Keep canvas height consistent for mobile */
+        max-width: 95vw; /* Use viewport width for canvas */
+    }
+
+    #next-fruit-container {
+        width: 60px; /* Even smaller width */
+        height: 60px; /* Even smaller height */
+        font-size: 0.6rem; /* Even smaller font size */
+        padding: 1px; /* Even smaller padding */
+        order: -1; /* Place it above the canvas */
+    }
+
+    #next-fruit {
+        width: 40px; /* Even smaller width */
+        height: 40px; /* Even smaller height */
+    }
+
+    .legend-item {
+        width: 45px; /* Reduce legend item width */
+    }
+
+    .legend-image {
+        width: 30px; /* Reduce legend image size */
+        height: 30px;
+    }
+
+    .legend-name, .legend-points {
+        font-size: 0.6rem; /* Reduce legend text size */
+    }
+
+    /* ゲームオーバーテキストの調整 */
+    #game-over h2 {
+        font-size: 3em; /* スマートフォン向けに調整 */
+    }
+}
