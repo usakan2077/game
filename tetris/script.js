@@ -1,17 +1,9 @@
 // テトリスゲームのJavaScript
 document.addEventListener('DOMContentLoaded', () => {
-    // キャンバスとコンテキストの設定
-    const canvas = document.getElementById('tetris-board');
-    const ctx = canvas.getContext('2d');
-    const nextPieceCanvas = document.getElementById('next-piece');
-    const nextPieceCtx = nextPieceCanvas.getContext('2d');
-    const holdPieceCanvas = document.getElementById('hold-piece');
-    const holdPieceCtx = holdPieceCanvas.getContext('2d');
-    
     // ゲームの設定
     const COLS = 10;
     const ROWS = 20;
-    const BLOCK_SIZE = 30;
+    const BLOCK_SIZE = 20; // スマホ向けにブロックサイズを小さく
     const COLORS = [
         null,
         '#FF0D72', // I
@@ -22,6 +14,22 @@ document.addEventListener('DOMContentLoaded', () => {
         '#FFE138', // T
         '#3877FF'  // Z
     ];
+    
+    // キャンバスとコンテキストの設定
+    const canvas = document.getElementById('tetris-board');
+    const ctx = canvas.getContext('2d');
+    canvas.width = COLS * BLOCK_SIZE;
+    canvas.height = ROWS * BLOCK_SIZE;
+
+    const nextPieceCanvas = document.getElementById('next-piece');
+    const nextPieceCtx = nextPieceCanvas.getContext('2d');
+    nextPieceCanvas.width = BLOCK_SIZE * 4; // ピースの最大幅に合わせて調整
+    nextPieceCanvas.height = BLOCK_SIZE * 4; // ピースの最大高さに合わせて調整
+
+    const holdPieceCanvas = document.getElementById('hold-piece');
+    const holdPieceCtx = holdPieceCanvas.getContext('2d');
+    holdPieceCanvas.width = BLOCK_SIZE * 4; // ピースの最大幅に合わせて調整
+    holdPieceCanvas.height = BLOCK_SIZE * 4; // ピースの最大高さに合わせて調整
     
     // テトリミノの形状定義
     const SHAPES = [
@@ -454,18 +462,23 @@ document.addEventListener('DOMContentLoaded', () => {
         
         switch (event.key) {
             case 'ArrowLeft':
+                event.preventDefault();
                 movePiece(-1);
                 break;
             case 'ArrowRight':
+                event.preventDefault();
                 movePiece(1);
                 break;
             case 'ArrowDown':
+                event.preventDefault();
                 dropPiece();
                 break;
             case 'ArrowUp':
+                event.preventDefault();
                 rotatePiece();
                 break;
             case ' ':
+                event.preventDefault();
                 hardDrop();
                 break;
             case 'c':
