@@ -51,6 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let isDropping = false;
     let dropPosition; // 初期化は後で行う
     let imagesLoaded = false;
+    let particles = []; // パーティクルを管理する配列
 
     // フルーツの定義
     const fruits = [
@@ -314,6 +315,25 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 500);
     }
 
+    // パーティクルエフェクトを生成する関数
+    function createParticleEffect(x, y, color) {
+        const numParticles = 20; // 生成するパーティクルの数
+        for (let i = 0; i < numParticles; i++) {
+            const angle = Math.random() * Math.PI * 2; // 全方向
+            const speed = Math.random() * 3 + 1; // 速度
+            particles.push({
+                x: x,
+                y: y,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed,
+                radius: Math.random() * 3 + 1, // 初期サイズ
+                color: color,
+                alpha: 1, // 初期透明度
+                life: 60 // 寿命（フレーム数）
+            });
+        }
+    }
+
     // 衝突検出の処理を追加（修正版）
     Events.on(engine, 'collisionActive', (event) => {
         const pairs = event.pairs;
@@ -346,6 +366,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     World.remove(world, bodyA);
                     World.remove(world, bodyB);
+
+                    // パーティクルエフェクトを生成
+                    createParticleEffect(position.x, position.y, fruit.color);
 
                     const nextFruitName = fruit.next;
                     const nextFruitData = getFruitByName(nextFruitName);
@@ -384,7 +407,19 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     );
 
+                    // Matter.jsの物理ボディのスケールは変更せず、見た目のスケールのみを操作するため、
+                    // 初期スプライトスケールを保存しておく
+                    if (newFruitBody.render.sprite) {
+                        newFruitBody.render.sprite.initialXScale = renderOptionsNext.sprite.xScale;
+                        newFruitBody.render.sprite.initialYScale = renderOptionsNext.sprite.yScale;
+                    }
+
                     World.add(world, newFruitBody);
+
+                    // 新しいフルーツにバウンドエフェクトのプロパティを追加
+                    newFruitBody.isBouncing = true;
+                    newFruitBody.bounceProgress = 0; // 0から1までの進行度
+                    newFruitBody.bounceDuration = 30; // エフェクトのフレーム数 (例: 0.5秒 = 30フレーム)
 
                     score += fruit.points;
                     updateScore();
@@ -411,6 +446,66 @@ document.addEventListener('DOMContentLoaded', () => {
     // ゲームオーバーのチェック
     Events.on(engine, 'afterUpdate', () => {
         const ctx = render.context; // コンテキストを最初に取得
+        const bodies = Composite.allBodies(world); // bodiesをここで一度だけ宣言
+
+        // パーティクルの描画と更新
+        for (let i = particles.length - 1; i >= 0; i--) {
+            const p = particles[i];
+            p.x += p.vx;
+            p.y += p.vy;
+            p.alpha -= 1 / p.life; // 寿命に応じて透明度を減少
+            p.radius += 0.1; // 徐々に拡大
+
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+            // HEXカラーをRGBに変換してrgba()で使用
+            const r = parseInt(p.color.slice(1, 3), 16);
+            const g = parseInt(p.color.slice(3, 5), 16);
+            const b = parseInt(p.color.slice(5, 7), 16);
+            ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${p.alpha})`;
+            ctx.fill();
+
+            if (p.alpha <= 0) {
+                particles.splice(i, 1); // 寿命が尽きたパーティクルを削除
+            }
+        }
+
+        // フルーツのバウンドエフェクトの更新
+        for (let body of bodies) { // 既存のbodiesを使用
+            if (body.isBouncing) {
+                body.bounceProgress++;
+                const progress = body.bounceProgress / body.bounceDuration;
+
+                // スケールファクターの計算 (0.5で最大に伸び、1で元のサイズに戻る)
+                // ユーザーの要望は「上下に伸び縮み」なので、yScaleのみを操作
+                let targetScaleY = 1;
+                if (progress <= 0.5) {
+                    // 最初の半分: 伸びる (1.0 -> 1.2)
+                    targetScaleY = 1 + Math.sin(progress * Math.PI) * 0.2; // sin(0)からsin(PI/2)まで
+                } else if (progress > 0.5 && progress <= 1) {
+                    // 後半: 縮む (1.2 -> 1.0)
+                    targetScaleY = 1 + Math.sin(progress * Math.PI) * 0.2; // sin(PI/2)からsin(PI)まで
+                }
+
+                // Matter.jsの物理ボディのスケールは変更せず、見た目のスケールのみを操作
+                if (body.render.sprite) {
+                    body.render.sprite.yScale = body.render.sprite.initialYScale * targetScaleY;
+                    body.render.sprite.xScale = body.render.sprite.initialXScale; // x方向は初期スケールを維持
+                }
+
+                if (progress >= 1) {
+                    // エフェクト終了
+                    body.isBouncing = false;
+                    // 最終的に元のスケールに戻す (初期スケールを再適用)
+                    if (body.render.sprite) {
+                        body.render.sprite.yScale = body.render.sprite.initialYScale;
+                        body.render.sprite.xScale = body.render.sprite.initialXScale;
+                    }
+                    delete body.bounceProgress;
+                    delete body.bounceDuration;
+                }
+            }
+        }
 
         if (gameOver) { // ゲームオーバーなら、テキスト描画のみ行い、他の更新はスキップする場合
             // 半透明のオーバーレイを描画
@@ -435,12 +530,12 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.stroke();
         // --- 基準線の描画ここまで ---
 
-        const bodies = Composite.allBodies(world);
+        // bodiesは既に上で宣言されているため、ここでは再宣言しない
         let isAnyFruitAboveThreshold = false;
         let fruitCount = 0;
         let highestFruitY = gameHeight; // 最も高いフルーツのY座標を記録
 
-        for (let body of bodies) {
+        for (let body of bodies) { // 既存のbodiesを使用
             if (body.label !== 'wall') {
                 fruitCount++;
                 if (body.position.y < highestFruitY) {
@@ -558,7 +653,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (closeLegendModalButton) {
-        closeLegendModalButton.addEventListener('click', () => {
+        closeLegendModalButton.addEventListener(() => {
             legendModal.style.display = 'none'; // モーダルを非表示
         });
     }
@@ -596,3 +691,31 @@ document.addEventListener('DOMContentLoaded', () => {
     // キャンバスの背景色を設定
     canvas.style.backgroundColor = '#e6fcec'; // 薄いグリーン
 });
+
+</final_file_content>
+
+IMPORTANT: For any future changes to this file, use the final_file_content shown above as your reference. This content reflects the current state of the file, including any auto-formatting (e.g., if you used single quotes but the formatter converted them to double quotes). Always base your SEARCH/REPLACE operations on this final version to ensure accuracy.
+
+<environment_details>
+# VSCode Visible Files
+C:/Users/daiki/AppData/Local/Programs/Microsoft VS Code/tetris/styles.css
+C:/Users/daiki/AppData/Local/Programs/Microsoft VS Code/tetris/styles.css
+suica/script.js
+
+# VSCode Open Tabs
+suica/index.html
+suica/script.js
+suica/style.css
+tetris/index.html
+tetris/styles.css
+tetris/script.js
+
+# Current Time
+6/8/2025, 4:34:38 PM (Asia/Tokyo, UTC+9:00)
+
+# Context Window Usage
+77,083 / 1,048.576K tokens used (7%)
+
+# Current Mode
+ACT MODE
+</environment_details>
