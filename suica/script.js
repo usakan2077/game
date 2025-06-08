@@ -242,7 +242,6 @@ document.addEventListener('DOMContentLoaded', () => {
             nextFruitElement.style.backgroundImage = 'none';
             nextFruitElement.style.backgroundColor = fruit.color;
         }
-        nextFruitElement.style.borderRadius = '50%';
     }
 
     // フルーツを名前で取得
@@ -526,6 +525,29 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
 
+                // --- 基準線を超えたフルーツの強調表示 ---
+                if (body.position.y < threshold && !isDropping) {
+                    // フルーツの実際の位置に警告マーカーを描画
+                    ctx.beginPath();
+                    ctx.arc(body.position.x, body.position.y, body.circleRadius + 5, 0, Math.PI * 2); // フルーツより少し大きい円
+                    ctx.fillStyle = 'rgba(255, 0, 0, 0.2)'; // 半透明の赤
+                    ctx.fill();
+
+                    if (!body.timeAboveThreshold) {
+                        body.timeAboveThreshold = 1;
+                    } else {
+                        body.timeAboveThreshold++;
+                        if (body.timeAboveThreshold > 60) { // 約1秒間閾値を超えていたら
+                            console.log('[gameOverCheck] Fruit above threshold for too long:', body.label, 'Y:', body.position.y, 'Time:', body.timeAboveThreshold);
+                            isAnyFruitAboveThreshold = true;
+                            // isAnyFruitAboveThresholdがtrueになったらループを抜ける必要はない（全ての警告マーカーを描画するため）
+                            // break; // ここでbreakすると、他の超えているフルーツの警告が描画されない
+                        }
+                    }
+                } else if (body.position.y >= threshold) {
+                    body.timeAboveThreshold = 0;
+                }
+                // --- 強調表示ここまで ---
             }
         }
 
