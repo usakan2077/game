@@ -16,7 +16,7 @@
                 <span>スコア: </span>
                 <span id="score">0</span>
             </div>
-            <button id="restart-button">リスタート</button>
+            <button id="legend-toggle-button" class="mobile-only-button hidden">フルーツ進化表</button> <!-- テキストを変更 -->
         </div>
         
         <div class="game-area">
@@ -39,12 +39,26 @@
             <h3>フルーツ進化表</h3>
             <div id="fruit-legend-container"></div>
         </div>
+
+        <!-- 新しいコントロールボタンコンテナ -->
+        <div class="game-controls-bottom mobile-only-controls">
+            <button id="restart-button">リスタート</button>
+        </div>
     </div>
     
     <img id="animal-image" src="images/animal.png" alt="Animal" style="display: none;">
-</body>
-</html>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.18.0/matter.min.js"></script>
     <script src="script.js"></script>
+
+    <!-- フルーツ凡例モーダル -->
+    <div id="legend-modal" class="hidden">
+        <div class="modal-content">
+            <span class="close-button" id="close-legend-modal">&times;</span>
+            <div class="fruit-legend-modal-content">
+                <h3>フルーツ進化表</h3>
+                <div id="fruit-legend-container-modal"></div> <!-- モーダル用の凡例コンテナ -->
+            </div>
+        </div>
+    </div>
 </body>
 </html>

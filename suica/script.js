@@ -4,30 +4,44 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // キャンバスの設定
     const canvas = document.getElementById('game-canvas');
-    const gameWidth = 400;
-    const gameHeight = 500;
-    canvas.width = gameWidth;
-    canvas.height = gameHeight;
+    let gameWidth;
+    let gameHeight;
 
     // 物理エンジンの初期化
     const engine = Engine.create();
     const world = engine.world;
     engine.gravity.y = 0.8;
 
-    const render = Render.create({
-        canvas: canvas,
-        engine: engine,
-        options: {
-            width: gameWidth,
-            height: gameHeight,
-            wireframes: false,
-            background: '#f8f8f8'
-        }
-    });
+    let render; // renderをletで宣言
 
-    Render.run(render);
-    const runner = Runner.create();
-    Runner.run(runner, engine);
+    // キャンバスとレンダラーのサイズを更新する関数
+    function updateCanvasAndRendererSize() {
+        const rect = canvas.getBoundingClientRect();
+        gameWidth = rect.width;
+        gameHeight = rect.height;
+
+        canvas.width = gameWidth;
+        canvas.height = gameHeight;
+
+        if (render) {
+            Render.stop(render); // 既存のレンダラーを停止
+            render.canvas.remove(); // 既存のキャンバス要素を削除（Matter.jsが新しいキャンバスを作成するため）
+        }
+
+        render = Render.create({
+            canvas: canvas,
+            engine: engine,
+            options: {
+                width: gameWidth,
+                height: gameHeight,
+                wireframes: false,
+                background: '#f8f8f8'
+            }
+        });
+        Render.run(render);
+        Runner.run(Runner.create(), engine); // Runnerもここで初期化・実行
+        updateWalls(); // 壁の位置を更新
+    }
 
     // ゲーム変数
     let score = 0;
@@ -35,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentFruit = null;
     let nextFruit = null;
     let isDropping = false;
-    let dropPosition = gameWidth / 2;
+    let dropPosition; // 初期化は後で行う
     let imagesLoaded = false;
 
     // フルーツの定義
@@ -68,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (loadedCount === totalImages) {
                     imagesLoaded = true;
                     console.log('すべての画像が読み込まれました');
-                    createFruitLegend();
+                    createFruitLegend(); // オリジナルの凡例とモーダル用の凡例を両方作成
                     prepareNextFruit();
                 }
             };
@@ -89,62 +103,74 @@ document.addEventListener('DOMContentLoaded', () => {
     // 凡例の作成
     function createFruitLegend() {
         const legendContainer = document.getElementById('fruit-legend-container');
+        const modalLegendContainer = document.getElementById('fruit-legend-container-modal');
+
+        // 両方のコンテナをクリア
         legendContainer.innerHTML = '';
+        modalLegendContainer.innerHTML = '';
 
         fruits.forEach((fruit, index) => {
+            // 通常の凡例アイテムを作成
             const legendItem = document.createElement('div');
             legendItem.className = 'legend-item';
-
             const fruitImg = document.createElement('img');
             fruitImg.className = 'legend-image';
             fruitImg.src = `images/${fruit.name}.png`;
             fruitImg.alt = fruit.displayName;
-
             const fruitName = document.createElement('div');
             fruitName.className = 'legend-name';
             fruitName.textContent = fruit.displayName;
-
             const points = document.createElement('div');
             points.className = 'legend-points';
             points.textContent = `${fruit.points}点`;
-
             legendItem.appendChild(fruitImg);
             legendItem.appendChild(fruitName);
             legendItem.appendChild(points);
             legendContainer.appendChild(legendItem);
+
+            // モーダル用の凡例アイテムを作成 (複製)
+            const modalLegendItem = legendItem.cloneNode(true);
+            modalLegendContainer.appendChild(modalLegendItem);
 
             if (fruit.next) {
                 const arrow = document.createElement('div');
                 arrow.className = 'legend-arrow';
                 arrow.textContent = '→';
                 legendContainer.appendChild(arrow);
+                modalLegendContainer.appendChild(arrow.cloneNode(true)); // モーダルにも矢印を追加
             }
         });
     }
 
     // 壁の作成 - 壁の厚さを増やし、確実に衝突するようにします
-    const wallOptions = {
-        isStatic: true,
-        render: {
-            fillStyle: '#a3cca3' // 枠の色を薄いグリーンに変更
-        },
-        label: 'wall',
-        restitution: 0.2,
-        friction: 0.1
-    };
+    // 壁の作成と更新
+    let walls = []; // wallsをletで宣言
+    function updateWalls() {
+        // 既存の壁を削除
+        World.remove(world, walls);
 
-    const walls = [
-        Bodies.rectangle(gameWidth / 2, gameHeight, gameWidth, 20, wallOptions),
-        Bodies.rectangle(gameWidth / 2, 0, gameWidth, 10, wallOptions),
-        Bodies.rectangle(0, gameHeight / 2, 10, gameHeight, wallOptions),
-        Bodies.rectangle(gameWidth, gameHeight / 2, 10, gameHeight, wallOptions)
-    ];
+        const wallOptions = {
+            isStatic: true,
+            render: {
+                fillStyle: '#a3cca3'
+            },
+            label: 'wall',
+            restitution: 0.2,
+            friction: 0.1
+        };
 
-    World.add(world, walls);
+        walls = [
+            Bodies.rectangle(gameWidth / 2, gameHeight, gameWidth, 20, wallOptions), // Bottom wall
+            Bodies.rectangle(gameWidth / 2, 0, gameWidth, 10, wallOptions), // Top wall (for game over check)
+            Bodies.rectangle(0, gameHeight / 2, 10, gameHeight, wallOptions), // Left wall
+            Bodies.rectangle(gameWidth, gameHeight / 2, 10, gameHeight, wallOptions) // Right wall
+        ];
+        World.add(world, walls);
+    }
 
     // ラインの作成（落下ラインの可視化）
     const dropLine = {
-        position: gameWidth / 2,
+        position: gameWidth / 2, // 初期値は仮
         draw: function() {
             const ctx = render.context;
             // ctx.beginPath();
@@ -520,9 +546,46 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('restart-button').addEventListener('click', resetGame);
     document.getElementById('play-again').addEventListener('click', resetGame);
 
+    // モーダル関連のイベントリスナー
+    const legendToggleButton = document.getElementById('legend-toggle-button');
+    const legendModal = document.getElementById('legend-modal');
+    const closeLegendModalButton = document.getElementById('close-legend-modal');
+
+    if (legendToggleButton) {
+        legendToggleButton.addEventListener('click', () => {
+            legendModal.style.display = 'flex'; // モーダルを表示
+        });
+    }
+
+    if (closeLegendModalButton) {
+        closeLegendModalButton.addEventListener('click', () => {
+            legendModal.style.display = 'none'; // モーダルを非表示
+        });
+    }
+
+    // モーダルの外側をクリックで閉じる
+    window.addEventListener('click', (event) => {
+        if (event.target === legendModal) {
+            legendModal.style.display = 'none'; // モーダルを非表示
+        }
+    });
+
     document.getElementById('game-over').style.display = 'none';
+    
+    // 初期化処理
+    updateCanvasAndRendererSize(); // 初回ロード時にキャンバスサイズを設定
+    dropPosition = gameWidth / 2; // gameWidthが設定された後に初期化
+    dropLine.position = dropPosition; // dropLineの初期位置も設定
     loadFruitImages();
     resetGame();
+
+    // ウィンドウリサイズ時の処理
+    window.addEventListener('resize', () => {
+        updateCanvasAndRendererSize();
+        // ドロップラインの位置も再計算
+        dropPosition = gameWidth / 2;
+        dropLine.position = dropPosition;
+    });
 
     // 背景画像を設定
     document.body.style.backgroundImage = "url('images/forest-background.jpg')";
