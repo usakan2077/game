@@ -667,7 +667,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // 背景画像を設定
-    document.body.style.backgroundImage = "url('images/forest-background.jpg')";
+    document.body.style.backgroundImage = "url('images/forest-background.png')";
     document.body.style.backgroundSize = "cover";
     document.body.style.backgroundRepeat = "no-repeat";
     document.body.style.backgroundAttachment = "fixed";
