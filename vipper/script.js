@@ -28,6 +28,14 @@ document.addEventListener('DOMContentLoaded', () => {
             render.canvas.remove(); // 既存のキャンバス要素を削除（Matter.jsが新しいキャンバスを作成するため）
         }
 
+        // フルーツの半径を画面幅に応じて調整
+        fruits = fruitDefinitions.map(fruitDef => {
+            const scaleFactor = gameWidth / BASE_GAME_WIDTH;
+            // 最小半径を保証するためにMath.maxを使用することも検討
+            const newRadius = fruitDef.baseRadius * scaleFactor;
+            return { ...fruitDef, radius: newRadius };
+        });
+
         render = Render.create({
             canvas: canvas,
             engine: engine,
@@ -54,19 +62,22 @@ document.addEventListener('DOMContentLoaded', () => {
     let particles = []; // パーティクルを管理する配列
 
     // フルーツの定義
-    const fruits = [
-        { name: 'cherry', radius: 15, color: '#F20000', points: 1, next: 'strawberry', displayName: 'ねじりん（ちぇりー）' },
-        { name: 'strawberry', radius: 22, color: '#FF5555', points: 3, next: 'grape', displayName: 'けすじー' },
-        { name: 'grape', radius: 30, color: '#8000D7', points: 6, next: 'orange', displayName: 'メッシ' },
-        { name: 'orange', radius: 38, color: '#FFA500', points: 10, next: 'persimmon', displayName: 'ヨヨヨ' },
-        { name: 'persimmon', radius: 45, color: '#FF8C00', points: 15, next: 'apple', displayName: '西陣' },
-        { name: 'apple', radius: 52, color: '#E52D27', points: 21, next: 'pear', displayName: 'ニック' },
-        { name: 'pear', radius: 60, color: '#C9CC3F', points: 28, next: 'peach', displayName: '吾郎' },
-        { name: 'peach', radius: 68, color: '#FFB7A2', points: 36, next: 'pineapple', displayName: 'やすにゃ' },
-        { name: 'pineapple', radius: 76, color: '#FFD700', points: 45, next: 'melon', displayName: 'まいまい' },
-        { name: 'melon', radius: 85, color: '#32CD32', points: 55, next: 'watermelon', displayName: 'こっとんちゃん' },
-        { name: 'watermelon', radius: 95, color: '#008000', points: 66, next: null, displayName: 'おおおちゃん' }
+    // フルーツの定義 (ベース半径)
+    const BASE_GAME_WIDTH = 600; // 基準となるゲームの横幅
+    const fruitDefinitions = [
+        { name: 'cherry', baseRadius: 15, color: '#F20000', points: 1, next: 'strawberry', displayName: 'ねじりん（ちぇりー）' },
+        { name: 'strawberry', baseRadius: 22, color: '#FF5555', points: 3, next: 'grape', displayName: 'けすじー' },
+        { name: 'grape', baseRadius: 30, color: '#8000D7', points: 6, next: 'orange', displayName: 'メッシ' },
+        { name: 'orange', baseRadius: 38, color: '#FFA500', points: 10, next: 'persimmon', displayName: 'ヨヨヨ' },
+        { name: 'persimmon', baseRadius: 45, color: '#FF8C00', points: 15, next: 'apple', displayName: '西陣' },
+        { name: 'apple', baseRadius: 52, color: '#E52D27', points: 21, next: 'pear', displayName: 'ニック' },
+        { name: 'pear', baseRadius: 60, color: '#C9CC3F', points: 28, next: 'peach', displayName: '吾郎' },
+        { name: 'peach', baseRadius: 68, color: '#FFB7A2', points: 36, next: 'pineapple', displayName: 'やすにゃ' },
+        { name: 'pineapple', baseRadius: 76, color: '#FFD700', points: 45, next: 'melon', displayName: 'まいまい' },
+        { name: 'melon', baseRadius: 85, color: '#32CD32', points: 55, next: 'watermelon', displayName: 'こっとんちゃん' },
+        { name: 'watermelon', baseRadius: 95, color: '#008000', points: 66, next: null, displayName: 'おおおちゃん' }
     ];
+    let fruits = []; // 動的に半径が設定されるフルーツ配列
 
     // フルーツのスプライト画像
     const fruitSprites = {};
@@ -74,9 +85,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // フルーツ画像の読み込み
     function loadFruitImages() {
         let loadedCount = 0;
-        const totalImages = fruits.length;
+        const totalImages = fruitDefinitions.length;
 
-        fruits.forEach(fruit => {
+        fruitDefinitions.forEach(fruit => {
             const img = new Image();
             img.onload = () => {
                 loadedCount++;
@@ -110,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
         legendContainer.innerHTML = '';
         modalLegendContainer.innerHTML = '';
 
-        fruits.forEach((fruit, index) => {
+        fruitDefinitions.forEach((fruit, index) => {
             // 通常の凡例アイテムを作成
             const legendItem = document.createElement('div');
             legendItem.className = 'legend-item';
@@ -133,6 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const modalLegendItem = legendItem.cloneNode(true);
             modalLegendContainer.appendChild(modalLegendItem);
 
+            // fruitDefinitionsの要素にはnextプロパティがあるので、そのまま使用
             if (fruit.next) {
                 const arrow = document.createElement('div');
                 arrow.className = 'legend-arrow';
@@ -246,7 +258,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // フルーツを名前で取得
     function getFruitByName(name) {
-        return fruits.find(fruit => fruit.name === name);
+        // 動的に半径が設定されたfruits配列から検索
+        const foundFruit = fruits.find(fruit => fruit.name === name);
+        if (foundFruit) {
+            return foundFruit;
+        }
+        // もし見つからなければ、元のfruitDefinitionsから検索（フォールバック）
+        return fruitDefinitions.find(fruitDef => fruitDef.name === name);
     }
 
     // フルーツをドロップ
