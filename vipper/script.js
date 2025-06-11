@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
         fruits = fruitDefinitions.map(fruitDef => {
             const scaleFactor = gameWidth / BASE_GAME_WIDTH;
             // 最小半径を保証するためにMath.maxを使用することも検討
-            const newRadius = fruitDef.baseRadius * scaleFactor;
+            const newRadius = fruitDef.baseRadius * scaleFactor * 1.4;
             return { ...fruitDef, radius: newRadius };
         });
 
@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
         { name: 'peach', baseRadius: 68, color: '#FFB7A2', points: 36, next: 'pineapple', displayName: 'やすにゃ' },
         { name: 'pineapple', baseRadius: 76, color: '#FFD700', points: 45, next: 'melon', displayName: 'まいまい' },
         { name: 'melon', baseRadius: 85, color: '#32CD32', points: 55, next: 'watermelon', displayName: 'こっとんちゃん' },
-        { name: 'watermelon', baseRadius: 95, color: '#008000', points: 66, next: null, displayName: 'おおおちゃん' }
+        { name: 'watermelon', baseRadius: 95, color: '#008000', points: 66, next: null, displayName: 'OOO' }
     ];
     let fruits = []; // 動的に半径が設定されるフルーツ配列
 
