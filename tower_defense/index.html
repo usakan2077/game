@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>タワーディフェンス</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>タワーディフェンスゲーム</h1>
+    <canvas id="gameCanvas"></canvas>
+    <div id="controls">
+        <p>ポイント: <span id="points"></span></p>
+        <p>ウェーブ: <span id="waveNumberDisplay">0</span></p>
+        <p>次のウェーブまで: <span id="waveCountdownDisplay"></span></p>
+        <div id="towerSelection">
+            <button id="selectTowerA">タワーA (攻:普 射:普 速:普 50P)</button>
+            <button id="selectTowerB">タワーB (攻:高 射:短 速:普 70P)</button>
+            <button id="selectTowerC">タワーC (攻:普 射:長 速:遅 60P)</button>
+            <button id="selectTowerD">タワーD (攻:低 射:普 速:速 40P)</button>
+        </div>
+        <button id="placeTower">タワー設置モード</button>
+        <button id="placeObstacle">障害物設置モード</button>
+        <button id="startGame">ゲーム開始</button>
+    </div>
+    <div id="gameOverScreen" style="display: none;">
+        <h2>ゲームオーバー</h2>
+        <button id="restartGame">リセット</button>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
